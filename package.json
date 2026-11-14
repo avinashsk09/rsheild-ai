@@ -1,0 +1,11 @@
+{
+  "name": "qr-shield-ai",
+  "version": "1.0.0",
+  "description": "QR Shield AI - QR code and link security analysis platform",
+  "scripts": {
+    "install:all": "cd server && npm install && cd ../client && npm install",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm run dev"
+  }
+}
+
