@@ -1,11 +1,22 @@
 {
-  "name": "qr-shield-ai",
+  "name": "rshield-ai",
   "version": "1.0.0",
-  "description": "QR Shield AI - QR code and link security analysis platform",
+  "description": "RShield AI - QR code and link security analysis platform",
+  "type": "module",
   "scripts": {
-    "install:all": "cd server && npm install && cd ../client && npm install",
+    "build": "cd client && npm run build",
     "server": "cd server && npm run dev",
     "client": "cd client && npm run dev"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.0",
+    "@supabase/supabase-js": "^2.119.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "ipaddr.js": "^2.2.0",
+    "zod": "^3.24.2"
   }
 }
-

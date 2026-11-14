@@ -89,6 +89,10 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(config.port, () => {
-  console.log(`[RShield AI] Backend server running on port ${config.port}`);
-});
+export default app;
+
+if (!process.env.VERCEL) {
+  app.listen(config.port, () => {
+    console.log(`[RShield AI] Backend server running on port ${config.port}`);
+  });
+}
