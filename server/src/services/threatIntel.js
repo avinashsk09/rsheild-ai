@@ -29,7 +29,8 @@ const KNOWN_SHORTENERS = [
  * @returns {Promise<{ available: boolean, isThreat: boolean, threats?: string[], error?: string }>}
  */
 export async function checkGoogleSafeBrowsing(urlToCheck) {
-  if (!config.googleSafeBrowsingKey) {
+  const cleanKey = (config.googleSafeBrowsingKey || '').replace(/['"]/g, '').trim();
+  if (!cleanKey) {
     return {
       available: false,
       isThreat: false,
@@ -37,7 +38,7 @@ export async function checkGoogleSafeBrowsing(urlToCheck) {
     };
   }
 
-  const endpoint = `https://safebrowsing.googleapis.com/v4/threatMatches:find?key=${config.googleSafeBrowsingKey}`;
+  const endpoint = `https://safebrowsing.googleapis.com/v4/threatMatches:find?key=${cleanKey}`;
   const requestBody = {
     client: {
       clientId: 'qrshield-ai',
@@ -189,20 +190,42 @@ export function analyzeDomainHeuristics(rawUrl) {
   }
 
   // 6. Brand Impersonation / Typosquatting
-  // Check if any target brand appears in hostname, but the registered domain is NOT the official domain
+  // Related official brand services map
+  const BRAND_RELATED_DOMAINS = {
+    google: ['youtube.com', 'youtu.be', 'android.com', 'gmail.com', 'gstatic.com', 'googleapis.com', 'googleusercontent.com', 'googlesource.com', 'withgoogle.com', 'goo.gl', 'chrome.com'],
+    apple: ['apple.com', 'icloud.com', 'itunes.com', 'me.com', 'apple.co'],
+    microsoft: ['microsoft.com', 'live.com', 'office.com', 'office365.com', 'azure.com', 'windows.com', 'bing.com', 'github.com', 'msn.com', 'xbox.com', 'visualstudio.com'],
+    amazon: ['amazon.com', 'amazonaws.com', 'primevideo.com', 'media-amazon.com', 'images-amazon.com'],
+    paypal: ['paypal.com', 'paypal.me'],
+    facebook: ['facebook.com', 'fb.com', 'fb.me', 'meta.com'],
+    instagram: ['instagram.com'],
+    whatsapp: ['whatsapp.com', 'wa.me'],
+    netflix: ['netflix.com'],
+    spotify: ['spotify.com'],
+    telegram: ['telegram.org', 't.me'],
+    binance: ['binance.com'],
+    coinbase: ['coinbase.com'],
+    docusign: ['docusign.com', 'docusign.net'],
+    fedex: ['fedex.com'],
+    ups: ['ups.com'],
+    dhl: ['dhl.com'],
+    usps: ['usps.com'],
+  };
+
   for (const brand of TARGET_BRANDS) {
     const brandRegex = new RegExp(`(^|[-._])${brand}([-._]|$)`, 'i');
-    if (brandRegex.test(hostname) || hostname.includes(brand)) {
-      // Check if it's the official brand domain (e.g. google.com, paypal.com)
-      const officialEnds = [
-        `${brand}.com`,
-        `${brand}.org`,
-        `${brand}.net`,
-        `${brand}.co.uk`,
-        `${brand}.in`
-      ];
-      const isOfficial = officialEnds.some(end => hostname === end || hostname.endsWith(`.${end}`));
-      if (!isOfficial) {
+    if (brandRegex.test(hostname)) {
+      // 1. Check if brand is the TLD itself (e.g. antigravity.google, blog.google)
+      const isBrandTld = hostname === brand || hostname.endsWith(`.${brand}`);
+      
+      // 2. Check if hostname is an official ccTLD or gTLD for this brand (e.g. google.com, google.co.in, google.de)
+      const ccRegex = new RegExp(`^([a-z0-9-]+\\.)*${brand}\\.[a-z]{2,4}(\\.[a-z]{2})?$`, 'i');
+      const isOfficialDomain = ccRegex.test(hostname);
+
+      // 3. Check known ecosystem domains for that brand
+      const isRelatedOfficial = BRAND_RELATED_DOMAINS[brand]?.some(d => hostname === d || hostname.endsWith(`.${d}`));
+
+      if (!isBrandTld && !isOfficialDomain && !isRelatedOfficial) {
         isBrandImpersonation = true;
         impersonatedBrand = brand;
         findings.push({

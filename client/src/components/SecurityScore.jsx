@@ -55,9 +55,9 @@ export default function SecurityScore({ safetyScore }) {
       </div>
 
       <div className="flex items-center gap-4">
-        {/* SVG Ring Gauge */}
-        <div className="relative h-18 w-18 shrink-0 flex items-center justify-center">
-          <svg className="w-18 h-18 -rotate-90" viewBox="0 0 68 68">
+        {/* Circular SVG Ring Gauge */}
+        <div className="relative w-[76px] h-[76px] shrink-0 flex items-center justify-center">
+          <svg className="w-[76px] h-[76px] -rotate-90 block" viewBox="0 0 68 68">
             <circle
               cx="34"
               cy="34"
@@ -81,12 +81,12 @@ export default function SecurityScore({ safetyScore }) {
               />
             )}
           </svg>
-          <div className="absolute flex flex-col items-center justify-center">
-            <span className="font-mono text-lg font-bold text-ink leading-none">
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center select-none pointer-events-none">
+            <span className="font-mono text-xl font-extrabold text-ink leading-tight">
               {isUnableToVerify ? '—' : score}
             </span>
             {!isUnableToVerify && (
-              <span className="font-mono text-[9px] text-ink-faint leading-none mt-0.5">
+              <span className="font-mono text-[9px] font-semibold text-ink-muted leading-tight">
                 / 100
               </span>
             )}
