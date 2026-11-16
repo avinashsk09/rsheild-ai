@@ -4,7 +4,8 @@
   "description": "RShield AI - QR code and link security analysis platform",
   "type": "module",
   "scripts": {
-    "build": "cd client && npm run build",
+    "build": "npm --prefix client run build",
+    "install:client": "npm --prefix client install",
     "server": "cd server && npm run dev",
     "client": "cd client && npm run dev"
   },
