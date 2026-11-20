@@ -1,10 +1,10 @@
 import React from 'react';
-import { Shield, Radio, Activity } from 'lucide-react';
+import { Shield, Activity } from 'lucide-react';
 
 export default function Header({ scansToday }) {
   return (
-    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-sm py-3.5 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-30 w-full bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-sm py-3.5 px-4 sm:px-6 lg:px-8">
+      <div className="w-full flex items-center justify-between gap-4">
         {/* Brand & Tagline */}
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 rounded-2xl bg-navy-900 text-white flex items-center justify-center shrink-0 shadow-sm">
