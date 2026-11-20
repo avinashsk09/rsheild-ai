@@ -1,38 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header.jsx';
+import StatsGrid from './components/StatsGrid.jsx';
 import ScanSection from './components/ScanSection.jsx';
 import SecurityScore from './components/SecurityScore.jsx';
 import DestinationPreview from './components/DestinationPreview.jsx';
+import WebsitePreview from './components/WebsitePreview.jsx';
+import SecurityMetricsOverview from './components/SecurityMetricsOverview.jsx';
 import SecurityFindings from './components/SecurityFindings.jsx';
 import AIExplanation from './components/AIExplanation.jsx';
 import Recommendation from './components/Recommendation.jsx';
+import ProtectionCenter from './components/ProtectionCenter.jsx';
 import NonUrlPayloadView from './components/NonUrlPayloadView.jsx';
 import { analyzeUrl, analyzeQr, analyzeMessage, getMetrics } from './services/api.js';
 import { AlertCircle, RotateCcw } from 'lucide-react';
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isMetricsLoading, setIsMetricsLoading] = useState(true);
   const [scanningStep, setScanningStep] = useState('');
   const [analysisResult, setAnalysisResult] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
-  const [scansToday, setScansToday] = useState(null);
+  const [metrics, setMetrics] = useState(null);
 
-  // Load metrics on mount and when scans complete
+  // Load metrics from actual backend endpoint
   const refreshMetrics = async () => {
     try {
       const data = await getMetrics();
-      if (data && typeof data.scansToday === 'number') {
-        setScansToday(data.scansToday);
-      } else if (data && typeof data.totalScans === 'number') {
-        setScansToday(data.totalScans);
+      if (data) {
+        setMetrics(data);
       }
-    } catch {}
+    } catch (err) {
+      console.warn('Could not refresh backend metrics:', err.message);
+    } finally {
+      setIsMetricsLoading(false);
+    }
   };
 
   useEffect(() => {
     refreshMetrics();
 
-    // §11a: Session exit beacon on tab close / unload
+    // Session exit beacon on tab close / unload
     const handleExit = () => {
       if (navigator.sendBeacon) {
         navigator.sendBeacon('/api/session/exit');
@@ -94,9 +101,12 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-canvas text-ink font-sans">
-      <Header scansToday={scansToday} />
+      <Header scansToday={metrics?.scansToday ?? metrics?.totalScans} />
 
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6">
+        {/* Section 1: Cybersecurity Statistics Grid (Connected to actual backend metrics) */}
+        <StatsGrid metrics={metrics} isLoading={isMetricsLoading} />
+
         {/* Main Input / Scanning Section */}
         <ScanSection
           onAnalyze={handleAnalyze}
@@ -115,9 +125,9 @@ export default function App() {
           </div>
         )}
 
-        {/* Results Area (§8 Reference Layout: Two-Column Grid + Full-width Recommendation Strip) */}
+        {/* Section 2: Two-Column Security Results Grid */}
         {analysisResult && (
-          <div className="animate-in fade-in duration-200">
+          <section aria-label="Inspection Results" className="animate-in fade-in duration-200 mb-8">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">
                 Inspection Result
@@ -132,38 +142,58 @@ export default function App() {
               </button>
             </div>
 
-            {/* Two-Column Grid once a result exists */}
+            {/* Responsive Two-Column Layout on Desktop */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start mb-4">
-              {/* Left Column: Security Score + Destination Preview */}
+              {/* LEFT COLUMN: Score, Risk Classification, Destination Routing, Website Preview */}
               <div className="space-y-4">
+                {/* Large circular safety score (0–100) & risk classification */}
                 <SecurityScore safetyScore={analysisResult.safetyScore} />
 
                 {analysisResult.isNonUrlQr ? (
                   <NonUrlPayloadView qrPayload={analysisResult.qrPayload} />
                 ) : (
                   analysisResult.destinationPreview && (
-                    <DestinationPreview
-                      destinationPreview={analysisResult.destinationPreview}
-                      safetyScore={analysisResult.safetyScore}
-                    />
+                    <>
+                      {/* Original URL, Final destination URL, Redirect chain, Domain & Port Info */}
+                      <DestinationPreview
+                        destinationPreview={analysisResult.destinationPreview}
+                        safetyScore={analysisResult.safetyScore}
+                        showVisitButton={false}
+                      />
+
+                      {/* Website preview with favicon, SSL verification, and safe navigation controls */}
+                      <WebsitePreview
+                        destinationPreview={analysisResult.destinationPreview}
+                        safetyScore={analysisResult.safetyScore}
+                      />
+                    </>
                   )
                 )}
               </div>
 
-              {/* Right Column: Security Findings + AI Explanation */}
+              {/* RIGHT COLUMN: Positive checks, Suspicious indicators, Unavailable checks, AI explanation, Action */}
               <div className="space-y-4">
+                {/* Security Metrics Overview: passed, warnings, unavailable counts */}
+                <SecurityMetricsOverview findings={analysisResult.findings} />
+
+                {/* Positive security checks, Suspicious indicators, Unavailable checks */}
                 <SecurityFindings findings={analysisResult.findings} />
+
+                {/* Plain-language AI Explanation */}
                 <AIExplanation aiExplanation={analysisResult.aiExplanation} />
+
+                {/* Recommended security action */}
+                <Recommendation
+                  recommendation={analysisResult.recommendation}
+                  bandColor={analysisResult.safetyScore?.bandColor}
+                />
               </div>
             </div>
-
-            {/* Recommendation: Full-width strip below the grid */}
-            <Recommendation
-              recommendation={analysisResult.recommendation}
-              bandColor={analysisResult.safetyScore?.bandColor}
-            />
-          </div>
+          </section>
         )}
+
+        {/* Section 3: RShield Protection Center (6 confirmed safeguards) */}
+        <ProtectionCenter />
       </main>
 
       {/* Trust & Privacy Minimal Footer */}

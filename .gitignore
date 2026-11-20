@@ -36,3 +36,6 @@ Thumbs.db
 .gemini/
 .planning/
 
+
+.vercel
+.env*

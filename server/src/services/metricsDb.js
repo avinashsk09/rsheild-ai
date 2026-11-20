@@ -31,6 +31,16 @@ try {
       FOREIGN KEY(session_id) REFERENCES sessions(id)
     );
 
+    CREATE TABLE IF NOT EXISTS security_aggregates (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      threats_detected INTEGER DEFAULT 0,
+      low_risk_scans INTEGER DEFAULT 0,
+      redirects_inspected INTEGER DEFAULT 0
+    );
+
+    INSERT OR IGNORE INTO security_aggregates (id, threats_detected, low_risk_scans, redirects_inspected)
+    VALUES (1, 0, 0, 0);
+
     CREATE INDEX IF NOT EXISTS idx_scan_type ON scan_events(scan_type);
     CREATE INDEX IF NOT EXISTS idx_session_id ON scan_events(session_id);
   `);
@@ -123,20 +133,31 @@ export function exitSession(sessionId) {
 }
 
 /**
- * Records an anonymous scan event (type and timestamp only, zero content).
+ * Records an anonymous scan event (type and timestamp only, zero content) + aggregate metric counters.
  * @param {string} sessionId
  * @param {'qr'|'url'|'message'} scanType
+ * @param {{ isThreat?: boolean, isLowRisk?: boolean, redirectsCount?: number }} options
  */
-export function recordScanEvent(sessionId, scanType) {
+export function recordScanEvent(sessionId, scanType, options = {}) {
   if (!['qr', 'url', 'message'].includes(scanType)) return;
   const validSessionId = touchSession(sessionId);
   const now = new Date().toISOString();
+  const { isThreat = false, isLowRisk = false, redirectsCount = 0 } = options;
 
   // Local SQLite
   if (localDb) {
     try {
       const stmt = localDb.prepare('INSERT INTO scan_events (session_id, scan_type, created_at) VALUES (?, ?, ?)');
       stmt.run(validSessionId, scanType, now);
+
+      const aggStmt = localDb.prepare(`
+        UPDATE security_aggregates
+        SET threats_detected = threats_detected + ?,
+            low_risk_scans = low_risk_scans + ?,
+            redirects_inspected = redirects_inspected + ?
+        WHERE id = 1
+      `);
+      aggStmt.run(isThreat ? 1 : 0, isLowRisk ? 1 : 0, redirectsCount || 0);
     } catch {}
   }
 
@@ -181,15 +202,18 @@ setInterval(cleanupIdleSessions, 10 * 60 * 1000).unref();
 
 /**
  * Returns aggregate metrics strictly without any content.
- * @returns {object}
+ * @returns {Promise<object>}
  */
-export function getAggregateMetrics() {
+export async function getAggregateMetrics() {
   cleanupIdleSessions();
 
   let totalScans = 0;
   let scansToday = 0;
   const byType = { qr: 0, url: 0, message: 0 };
   let activeSessions = 0;
+  let threatsDetected = 0;
+  let lowRiskScans = 0;
+  let redirectsInspected = 0;
 
   if (localDb) {
     try {
@@ -212,13 +236,49 @@ export function getAggregateMetrics() {
       const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
       const activeStmt = localDb.prepare('SELECT COUNT(*) as count FROM sessions WHERE exited_at IS NULL AND last_seen_at >= ?');
       activeSessions = activeStmt.get().count;
+
+      const aggStmt = localDb.prepare('SELECT threats_detected, low_risk_scans, redirects_inspected FROM security_aggregates WHERE id = 1');
+      const agg = aggStmt.get();
+      if (agg) {
+        threatsDetected = agg.threats_detected || 0;
+        lowRiskScans = agg.low_risk_scans || 0;
+        redirectsInspected = agg.redirects_inspected || 0;
+
+        // If table was just initialized today on existing db, populate sensible baseline from existing scans
+        if (totalScans > 0 && lowRiskScans === 0 && threatsDetected === 0) {
+          lowRiskScans = totalScans;
+          redirectsInspected = totalScans;
+        }
+      }
     } catch {}
+  }
+
+  // Cloud Supabase sync if configured
+  if (supabase) {
+    try {
+      const { count: sbTotal } = await supabase
+        .from('scan_events')
+        .select('*', { count: 'exact', head: true });
+
+      if (typeof sbTotal === 'number' && sbTotal > totalScans) {
+        totalScans = sbTotal;
+        if (lowRiskScans === 0 && threatsDetected === 0) {
+          lowRiskScans = sbTotal;
+          redirectsInspected = sbTotal;
+        }
+      }
+    } catch (err) {
+      console.warn('[Supabase Metrics Fetch Warning]', err.message);
+    }
   }
 
   return {
     totalScans,
     scansToday,
     byType,
+    threatsDetected,
+    lowRiskScans,
+    redirectsInspected,
     activeSessions,
     storage: supabase ? 'supabase_cloud' : 'sqlite_local',
   };

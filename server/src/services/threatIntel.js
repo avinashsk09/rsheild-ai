@@ -10,7 +10,23 @@ const TARGET_BRANDS = [
   'paypal', 'google', 'apple', 'microsoft', 'netflix', 'amazon',
   'facebook', 'instagram', 'whatsapp', 'chase', 'wellsfargo', 'bankofamerica',
   'citi', 'binance', 'coinbase', 'metamask', 'docusign', 'fedex', 'ups',
-  'dhl', 'usps', 'irs', 'telegram', 'outlook', 'yahoo'
+  'dhl', 'usps', 'irs', 'telegram', 'outlook', 'yahoo', 'sbi', 'hdfc', 'icici', 'paytm', 'phonepe'
+];
+
+// Common typo / homoglyph lookalikes for high-profile targets
+const LOOKALIKE_MAP = [
+  { lookalike: 'paypa1', brand: 'paypal', legitimateDomain: 'paypal.com' },
+  { lookalike: 'paypaI', brand: 'paypal', legitimateDomain: 'paypal.com' },
+  { lookalike: 'micros0ft', brand: 'microsoft', legitimateDomain: 'microsoft.com' },
+  { lookalike: 'g00gle', brand: 'google', legitimateDomain: 'google.com' },
+  { lookalike: 'goog1e', brand: 'google', legitimateDomain: 'google.com' },
+  { lookalike: 'app1e', brand: 'apple', legitimateDomain: 'apple.com' },
+  { lookalike: 'arnazon', brand: 'amazon', legitimateDomain: 'amazon.com' },
+  { lookalike: 'amazn', brand: 'amazon', legitimateDomain: 'amazon.com' },
+  { lookalike: 'netflx', brand: 'netflix', legitimateDomain: 'netflix.com' },
+  { lookalike: 'faceb00k', brand: 'facebook', legitimateDomain: 'facebook.com' },
+  { lookalike: 'wellsfarg0', brand: 'wellsfargo', legitimateDomain: 'wellsfargo.com' },
+  { lookalike: 'b1nance', brand: 'binance', legitimateDomain: 'binance.com' },
 ];
 
 const DANGEROUS_EXTENSIONS = [

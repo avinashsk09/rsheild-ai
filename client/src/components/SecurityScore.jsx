@@ -13,7 +13,7 @@ export default function SecurityScore({ safetyScore }) {
     summaryReason,
   } = safetyScore;
 
-  // Exact color definitions per §8
+  // Exact color definitions per Design System
   let ringColor = '#3F7A5C'; // Green
   let badgeClass = 'text-risk-green-text bg-risk-green-bg border-risk-green-border';
   let Icon = ShieldCheck;
@@ -23,7 +23,7 @@ export default function SecurityScore({ safetyScore }) {
     badgeClass = 'text-ink-muted bg-canvas border-borderline';
     Icon = HelpCircle;
   } else if (bandColor === 'yellow' || band === 'Caution') {
-    ringColor = '#C9941D';
+    ringColor = '#B4863C';
     badgeClass = 'text-risk-amber-text bg-risk-amber-bg border-risk-amber-border';
     Icon = AlertTriangle;
   } else if (bandColor === 'orange' || band === 'High Risk') {
@@ -36,15 +36,15 @@ export default function SecurityScore({ safetyScore }) {
     Icon = isThreatIntelMatch ? ShieldAlert : AlertOctagon;
   }
 
-  // Calculate SVG gauge stroke
+  // Calculate SVG gauge stroke with large radius
   const numericScore = typeof score === 'number' ? score : 0;
-  const radius = 28;
+  const radius = 38;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (numericScore / 100) * circumference;
 
   return (
-    <div className="bg-surface border border-borderline rounded-xl p-4 sm:p-5 shadow-sm ring-1 ring-black/[0.02]">
-      <div className="flex items-center justify-between pb-3 mb-3 border-b border-borderline">
+    <div className="bg-surface border border-borderline rounded-xl p-5 shadow-sm ring-1 ring-black/[0.02]">
+      <div className="flex items-center justify-between pb-3 mb-4 border-b border-borderline">
         <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted flex items-center gap-1.5">
           <Icon className="h-3.5 w-3.5 stroke-[2]" />
           <span>Security Assessment</span>
@@ -54,25 +54,25 @@ export default function SecurityScore({ safetyScore }) {
         </span>
       </div>
 
-      <div className="flex items-center gap-4">
-        {/* Circular SVG Ring Gauge */}
-        <div className="relative w-[76px] h-[76px] shrink-0 flex items-center justify-center">
-          <svg className="w-[76px] h-[76px] -rotate-90 block" viewBox="0 0 68 68">
+      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
+        {/* Large Circular SVG Ring Gauge (0-100) */}
+        <div className="relative w-24 h-24 shrink-0 flex items-center justify-center">
+          <svg className="w-24 h-24 -rotate-90 block" viewBox="0 0 96 96">
             <circle
-              cx="34"
-              cy="34"
+              cx="48"
+              cy="48"
               r={radius}
               stroke="#E4E2DB"
-              strokeWidth="5"
+              strokeWidth="6"
               fill="none"
             />
             {!isUnableToVerify && (
               <circle
-                cx="34"
-                cy="34"
+                cx="48"
+                cy="48"
                 r={radius}
                 stroke={ringColor}
-                strokeWidth="5"
+                strokeWidth="6"
                 strokeDasharray={circumference}
                 strokeDashoffset={strokeDashoffset}
                 strokeLinecap="round"
@@ -82,22 +82,22 @@ export default function SecurityScore({ safetyScore }) {
             )}
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center select-none pointer-events-none">
-            <span className="font-mono text-xl font-extrabold text-ink leading-tight">
+            <span className="font-mono text-3xl font-extrabold text-ink leading-none">
               {isUnableToVerify ? '—' : score}
             </span>
             {!isUnableToVerify && (
-              <span className="font-mono text-[9px] font-semibold text-ink-muted leading-tight">
+              <span className="font-mono text-[10px] font-semibold text-ink-muted mt-0.5 leading-none">
                 / 100
               </span>
             )}
           </div>
         </div>
 
-        {/* Score Details: Status + One-line reason */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-bold border ${badgeClass}`}>
-              <span className="h-1.5 w-1.5 rounded-full bg-current"></span>
+        {/* Score Details: Risk classification + Summary */}
+        <div className="flex-1 min-w-0 text-center sm:text-left">
+          <div className="flex items-center justify-center sm:justify-start gap-2 mb-2 flex-wrap">
+            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold border ${badgeClass}`}>
+              <span className="h-2 w-2 rounded-full bg-current"></span>
               {band}
             </span>
             {isThreatIntelMatch && (
@@ -107,16 +107,20 @@ export default function SecurityScore({ safetyScore }) {
             )}
           </div>
 
-          <p className="text-xs text-ink-muted leading-relaxed line-clamp-2">
+          <p className="text-xs text-ink-muted leading-relaxed mb-3">
             {summaryReason}
           </p>
 
-          {/* Mini 4-band visual bar */}
-          <div className="mt-2.5 flex items-center gap-1 w-full max-w-xs">
-            <div className={`h-1 flex-1 rounded-full ${numericScore < 20 && !isUnableToVerify ? 'bg-risk-red-text' : 'bg-borderline'}`} title="Critical (0-19)" />
-            <div className={`h-1 flex-1 rounded-full ${numericScore >= 20 && numericScore < 50 && !isUnableToVerify ? 'bg-risk-amber-text' : 'bg-borderline'}`} title="High Risk (20-49)" />
-            <div className={`h-1 flex-1 rounded-full ${numericScore >= 50 && numericScore < 80 && !isUnableToVerify ? 'bg-amber-400' : 'bg-borderline'}`} title="Caution (50-79)" />
-            <div className={`h-1 flex-1 rounded-full ${numericScore >= 80 && !isUnableToVerify ? 'bg-risk-green-text' : 'bg-borderline'}`} title="Low Risk (80-100)" />
+          {/* Mini 4-band visual bar with label */}
+          <div className="flex items-center gap-1.5 w-full max-w-xs mx-auto sm:mx-0">
+            <div className={`h-1.5 flex-1 rounded-full ${numericScore < 20 && !isUnableToVerify ? 'bg-risk-red-text' : 'bg-borderline'}`} title="Critical Risk (0-19)" />
+            <div className={`h-1.5 flex-1 rounded-full ${numericScore >= 20 && numericScore < 50 && !isUnableToVerify ? 'bg-risk-amber-text' : 'bg-borderline'}`} title="High Risk (20-49)" />
+            <div className={`h-1.5 flex-1 rounded-full ${numericScore >= 50 && numericScore < 80 && !isUnableToVerify ? 'bg-[#C9941D]' : 'bg-borderline'}`} title="Caution (50-79)" />
+            <div className={`h-1.5 flex-1 rounded-full ${numericScore >= 80 && !isUnableToVerify ? 'bg-risk-green-text' : 'bg-borderline'}`} title="Low Risk (80-100)" />
+          </div>
+
+          <div className="text-[10px] text-ink-faint mt-1.5 font-mono">
+            Scale: 0 (Critical Risk) to 100 (Low Observed Risk)
           </div>
         </div>
       </div>

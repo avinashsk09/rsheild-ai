@@ -65,8 +65,13 @@ app.post('/api/session/exit', (req, res) => {
 });
 
 // Aggregate scan and session metrics internal endpoint (§11a)
-app.get('/api/metrics', (req, res) => {
-  res.json(getAggregateMetrics());
+app.get('/api/metrics', async (req, res) => {
+  try {
+    const metrics = await getAggregateMetrics();
+    res.json(metrics);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to retrieve metrics' });
+  }
 });
 
 // Health check endpoint

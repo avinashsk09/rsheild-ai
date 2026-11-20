@@ -97,7 +97,6 @@ async function performUrlAnalysis(targetUrl, source = 'url') {
  */
 router.post('/url', async (req, res) => {
   try {
-    recordScanEvent(req.sessionId, 'url');
     const parseRes = urlSchema.safeParse(req.body);
     if (!parseRes.success) {
       return res.status(400).json({ error: parseRes.error.errors[0]?.message || 'Invalid input' });
@@ -110,6 +109,13 @@ router.post('/url', async (req, res) => {
     }
 
     const result = await performUrlAnalysis(inputUrl, 'url');
+
+    // Record scan outcome in metrics DB with real counters
+    const isThreat = result.safetyScore.score !== null && result.safetyScore.score < 50;
+    const isLowRisk = result.safetyScore.score !== null && result.safetyScore.score >= 80;
+    const redirectsCount = result.destinationPreview?.totalHops || 1;
+    recordScanEvent(req.sessionId, 'url', { isThreat, isLowRisk, redirectsCount });
+
     return res.json(result);
   } catch (err) {
     return res.status(500).json({
@@ -124,7 +130,6 @@ router.post('/url', async (req, res) => {
  */
 router.post('/qr', async (req, res) => {
   try {
-    recordScanEvent(req.sessionId, 'qr');
     const parseRes = qrSchema.safeParse(req.body);
     if (!parseRes.success) {
       return res.status(400).json({ error: parseRes.error.errors[0]?.message || 'Invalid input' });
@@ -136,6 +141,11 @@ router.post('/qr', async (req, res) => {
     // If payload is a URL, run the full URL analysis pipeline
     if (parsedQr.isUrl && parsedQr.url) {
       const urlAnalysis = await performUrlAnalysis(parsedQr.url, 'qr');
+      const isThreat = urlAnalysis.safetyScore.score !== null && urlAnalysis.safetyScore.score < 50;
+      const isLowRisk = urlAnalysis.safetyScore.score !== null && urlAnalysis.safetyScore.score >= 80;
+      const redirectsCount = urlAnalysis.destinationPreview?.totalHops || 1;
+      recordScanEvent(req.sessionId, 'qr', { isThreat, isLowRisk, redirectsCount });
+
       return res.json({
         ...urlAnalysis,
         qrPayload: parsedQr,
@@ -144,6 +154,7 @@ router.post('/qr', async (req, res) => {
 
     // If payload is non-URL (Wi-Fi, vCard, UPI/Crypto, Plain Text):
     // Display contents safely without execution
+    recordScanEvent(req.sessionId, 'qr', { isThreat: false, isLowRisk: true, redirectsCount: 0 });
     const scoreResult = {
       score: 90,
       band: 'Low Observed Risk',
@@ -209,7 +220,6 @@ router.post('/qr', async (req, res) => {
  */
 router.post('/message', async (req, res) => {
   try {
-    recordScanEvent(req.sessionId, 'message');
     const parseRes = messageSchema.safeParse(req.body);
     if (!parseRes.success) {
       return res.status(400).json({ error: parseRes.error.errors[0]?.message || 'Invalid input' });
@@ -318,6 +328,12 @@ router.post('/message', async (req, res) => {
       aiExplanation: explanationResult,
       recommendation,
     });
+
+    const isThreat = combinedScore < 50;
+    const isLowRisk = combinedScore >= 80;
+    const redirectsCount = urlAnalysis?.destinationPreview?.totalHops || 0;
+    recordScanEvent(req.sessionId, 'message', { isThreat, isLowRisk, redirectsCount });
+    return;
   } catch (err) {
     return res.status(500).json({
       error: 'Message analysis could not be completed',
