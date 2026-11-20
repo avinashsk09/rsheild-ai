@@ -104,7 +104,7 @@ export default function App() {
       {/* 2A. Header matching reference website */}
       <Header scansToday={metrics?.scansToday ?? metrics?.totalScans} />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <main className="flex-1 w-full max-w-none mx-0 px-4 sm:px-6 lg:px-8 2xl:px-10 py-8 space-y-8">
         {/* Hero Section */}
         <section className="space-y-2 text-center sm:text-left">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-navy-900 bg-navy-50 border border-navy-200">
@@ -114,7 +114,7 @@ export default function App() {
           <h1 className="text-3xl sm:text-5xl font-black text-navy-950 tracking-tight leading-tight">
             Check Before You Click, Scan, or Trust.
           </h1>
-          <p className="text-base sm:text-lg text-slate-600 font-medium max-w-3xl leading-relaxed">
+          <p className="text-base sm:text-lg text-slate-600 font-medium max-w-4xl leading-relaxed">
             Verify where suspicious QR codes, shortened links, and manipulative phishing messages truly lead before opening them in your browser.
           </p>
         </section>
@@ -142,7 +142,7 @@ export default function App() {
 
         {/* 2D. Analysis Results Grid (Responsive Two-Column Layout) */}
         {analysisResult && (
-          <section aria-label="Inspection Results" className="space-y-4 animate-in fade-in duration-200">
+          <section aria-label="Inspection Results" className="w-full space-y-4 animate-in fade-in duration-200">
             {/* Results Title Bar */}
             <div className="flex items-center justify-between pb-2 border-b border-slate-200">
               <span className="text-xs font-black uppercase tracking-wider text-slate-500">
@@ -213,7 +213,7 @@ export default function App() {
 
       {/* Commercial Product Footer */}
       <footer className="border-t border-slate-200 bg-white/95 py-8 px-4 sm:px-6 lg:px-8 mt-12 text-sm text-slate-600">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-navy-900 text-white flex items-center justify-center font-black text-xs">
               R
