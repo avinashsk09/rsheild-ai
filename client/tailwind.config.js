@@ -7,28 +7,28 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Reference design palette (niat-hackthon.vercel.app)
+        // RShield deep-teal cybersecurity palette
         navy: {
-          50: '#F0F5FA',
-          100: '#E1EBF5',
-          200: '#C3D7EB',
-          700: '#204A77',
-          800: '#1D3F63',
-          900: '#0F1E36', // Primary dark navy
-          950: '#0A1324', // Deepest dark navy
+          50: '#EDF7F6',
+          100: '#D8ECE9',
+          200: '#B7DCD7',
+          700: '#246A65',
+          800: '#19534F',
+          900: '#103B42', // Primary dark navy
+          950: '#0B262F', // Deepest dark navy
         },
         slate: {
-          50: '#F8FAFC',
-          100: '#F1F5F9',
-          200: '#E2E8F0',
-          300: '#CBD5E1',
-          400: '#94A3B8',
-          500: '#64748B',
-          600: '#475569',
-          700: '#334155',
-          800: '#1E293B',
-          900: '#0F172A',
-          950: '#020617',
+          50: '#F3F7F7',
+          100: '#EAF0EF',
+          200: '#DCE6E4',
+          300: '#C6D3D1',
+          400: '#91A5A2',
+          500: '#657B78',
+          600: '#4B615E',
+          700: '#354A48',
+          800: '#263A39',
+          900: '#172A2E',
+          950: '#0D1D21',
         },
         // Semantic risk severity colors from reference VerdictBadge & gauge
         emerald: {
