@@ -16,27 +16,27 @@ export default function NonUrlPayloadView({ qrPayload }) {
 
   const getIcon = () => {
     switch (type) {
-      case 'wifi': return <Wifi className="h-5 w-5 text-primary-muted" />;
+      case 'wifi': return <Wifi className="w-5 h-5 text-navy-900" />;
       case 'payment_upi':
-      case 'crypto_wallet': return <CreditCard className="h-5 w-5 text-primary-muted" />;
-      case 'contact': return <User className="h-5 w-5 text-primary-muted" />;
-      case 'communication': return <MessageCircle className="h-5 w-5 text-primary-muted" />;
-      default: return <FileText className="h-5 w-5 text-primary-muted" />;
+      case 'crypto_wallet': return <CreditCard className="w-5 h-5 text-navy-900" />;
+      case 'contact': return <User className="w-5 h-5 text-navy-900" />;
+      case 'communication': return <MessageCircle className="w-5 h-5 text-navy-900" />;
+      default: return <FileText className="w-5 h-5 text-navy-900" />;
     }
   };
 
   return (
-    <div className="bg-surface border border-borderline rounded-xl p-5 sm:p-6 mb-6 shadow-sm">
-      <div className="flex items-center justify-between pb-3 border-b border-borderline mb-4">
-        <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-lg bg-subtle border border-borderline">
+    <div className="bg-white/95 border-2 border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
+      <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
             {getIcon()}
           </div>
           <div>
-            <h2 className="text-base font-bold text-primary-charcoal tracking-tight">
+            <h3 className="text-base font-black text-navy-950 tracking-tight leading-snug">
               {label}
-            </h2>
-            <p className="text-xs text-primary-sub mt-0.5">
+            </h3>
+            <p className="text-xs text-slate-500 font-medium">
               Decoded static QR payload &bull; Never automatically executed or joined
             </p>
           </div>
@@ -45,29 +45,29 @@ export default function NonUrlPayloadView({ qrPayload }) {
         <button
           type="button"
           onClick={handleCopy}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-borderline bg-canvas text-xs font-medium text-primary-muted hover:bg-subtle transition-colors"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold text-slate-700 hover:text-navy-900 hover:bg-slate-100 transition-colors cursor-pointer"
         >
-          {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
-          <span>{copied ? 'Copied' : 'Copy Payload'}</span>
+          {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+          <span>{copied ? 'COPIED' : 'COPY'}</span>
         </button>
       </div>
 
       {warning && (
-        <div className="mb-4 p-3 bg-risk-yellow-bg/70 border border-risk-yellow-border text-xs text-risk-yellow-text rounded-lg flex items-start gap-2">
-          <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
-          <span>{warning}</span>
+        <div className="p-4 bg-amber-50 border-2 border-amber-300 text-xs text-amber-950 rounded-xl flex items-start gap-2.5">
+          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600" />
+          <span className="font-medium leading-relaxed">{warning}</span>
         </div>
       )}
 
-      {/* Render structured details if available */}
+      {/* Structured details */}
       {details && (
-        <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
           {Object.entries(details).map(([key, val]) => (
-            <div key={key} className="p-2.5 rounded-lg border border-borderline/80 bg-subtle/50">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-primary-sub block mb-0.5">
+            <div key={key} className="p-3 rounded-xl border border-slate-200 bg-slate-50">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-0.5">
                 {key.replace(/([A-Z])/g, ' $1').trim()}
               </span>
-              <span className="font-mono text-primary-charcoal font-medium break-all">
+              <span className="font-mono text-slate-900 font-bold break-all">
                 {typeof val === 'boolean' ? (val ? 'Yes' : 'No') : String(val || 'N/A')}
               </span>
             </div>
@@ -76,15 +76,14 @@ export default function NonUrlPayloadView({ qrPayload }) {
       )}
 
       {/* Raw Payload display */}
-      <div>
-        <label className="text-[10px] font-bold uppercase tracking-wider text-primary-sub block mb-1">
+      <div className="space-y-1">
+        <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">
           Raw Decoded Payload:
         </label>
-        <div className="p-3 rounded-lg border border-borderline bg-canvas font-mono text-xs text-primary-charcoal break-all whitespace-pre-wrap select-all">
+        <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 font-mono text-xs text-slate-900 break-all whitespace-pre-wrap select-all">
           {rawPayload}
         </div>
       </div>
     </div>
   );
 }
-

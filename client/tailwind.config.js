@@ -7,45 +7,72 @@ export default {
   theme: {
     extend: {
       colors: {
-        canvas: '#F7F6F2',
-        surface: '#FFFFFF',
-        borderline: '#E4E2DB',
-        ink: {
-          DEFAULT: '#1E1E1C',
-          muted: '#6B6A64',
-          faint: '#9A988F',
+        // Reference design palette (niat-hackthon.vercel.app)
+        navy: {
+          50: '#F0F5FA',
+          100: '#E1EBF5',
+          200: '#C3D7EB',
+          700: '#204A77',
+          800: '#1D3F63',
+          900: '#0F1E36', // Primary dark navy
+          950: '#0A1324', // Deepest dark navy
         },
-        risk: {
-          green: {
-            text: '#3F7A5C',
-            bg: '#EAF3EE',
-            border: '#cde4d6',
-            ring: '#3F7A5C',
-          },
-          amber: {
-            text: '#B4863C',
-            bg: '#FBF3E4',
-            border: '#edd9b5',
-            ring: '#C9941D',
-          },
-          red: {
-            text: '#B23A3A',
-            bg: '#FBEBEB',
-            border: '#f5c6c6',
-            ring: '#B23A3A',
-          },
-          gray: {
-            text: '#6B6A64',
-            bg: '#F0EFEA',
-            border: '#E4E2DB',
-            ring: '#9A988F',
-          }
-        }
+        slate: {
+          50: '#F8FAFC',
+          100: '#F1F5F9',
+          200: '#E2E8F0',
+          300: '#CBD5E1',
+          400: '#94A3B8',
+          500: '#64748B',
+          600: '#475569',
+          700: '#334155',
+          800: '#1E293B',
+          900: '#0F172A',
+          950: '#020617',
+        },
+        // Semantic risk severity colors from reference VerdictBadge & gauge
+        emerald: {
+          50: '#ECFDF5',
+          100: '#D1FAE5',
+          200: '#A7F3D0',
+          300: '#6EE7B7',
+          600: '#059669',
+          700: '#047857',
+          800: '#065F46',
+          900: '#064E3B',
+        },
+        amber: {
+          50: '#FFFBEB',
+          100: '#FEF3C7',
+          200: '#FDE68A',
+          300: '#FCD34D',
+          500: '#F59E0B',
+          600: '#D97706',
+          700: '#B45309',
+          800: '#92400E',
+          950: '#451A03',
+        },
+        red: {
+          50: '#FEF2F2',
+          100: '#FEE2E2',
+          200: '#FECACA',
+          300: '#FCA5A5',
+          500: '#EF4444',
+          600: '#DC2626',
+          700: '#B91C1C',
+          800: '#991B1B',
+          900: '#7F1D1D',
+          950: '#450A0A',
+        },
       },
       fontFamily: {
-        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        mono: ['JetBrains Mono', 'Fira Code', 'Consolas', 'monospace'],
-      }
+        sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+      },
+      borderRadius: {
+        '2xl': '1rem',
+        '3xl': '1.5rem',
+      },
     },
   },
   plugins: [],

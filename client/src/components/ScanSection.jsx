@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { QrCode, Link as LinkIcon, MessageSquare, ArrowRight, Loader2, CheckCircle2, Sparkles, ShieldCheck } from 'lucide-react';
+import { QrCode, Link as LinkIcon, MessageSquare, ArrowRight, Loader2, CheckCircle2, ShieldCheck, Sparkles } from 'lucide-react';
 import CameraScanner from './CameraScanner.jsx';
 import ImageUploader from './ImageUploader.jsx';
 
 export default function ScanSection({ onAnalyze, isLoading, scanningStep }) {
   const [activeTab, setActiveTab] = useState('url'); // 'qr' | 'url' | 'message'
-  const [qrMethod, setQrMethod] = useState('upload'); // 'upload' | 'camera'
+  const [qrMethod, setQrMethod] = useState('upload'); // 'upload' | 'camera' | 'manual'
   const [qrDecodedPayload, setQrDecodedPayload] = useState('');
   const [urlInput, setUrlInput] = useState('');
   const [messageInput, setMessageInput] = useState('');
@@ -63,135 +63,141 @@ export default function ScanSection({ onAnalyze, isLoading, scanningStep }) {
   };
 
   return (
-    <div className="bg-surface border border-borderline rounded-xl p-5 sm:p-6 mb-6 shadow-sm ring-1 ring-black/[0.02]">
-      {/* Top row: Pill-style tab group + Quick test presets */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-borderline">
-        {/* Pill-style tab group */}
-        <div className="flex items-center gap-1 p-1 bg-canvas border border-borderline rounded-lg">
+    <section aria-label="Scan & Threat Analysis Console" className="bg-white/95 border-2 border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm mb-8 space-y-6">
+      {/* Top Header: Tab Selector & Quick Presets */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-200">
+        {/* Navigation Tabs matching reference style */}
+        <div className="flex items-center gap-2 p-1.5 bg-slate-100 rounded-2xl border border-slate-200 flex-wrap">
           <button
             type="button"
             onClick={() => setActiveTab('url')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer ${
+            className={`min-h-[44px] px-4 sm:px-5 py-2 rounded-xl text-sm font-black transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'url'
-                ? 'bg-surface text-ink shadow-sm border border-borderline'
-                : 'text-ink-muted hover:text-ink'
+                ? 'bg-navy-900 text-white shadow-sm border border-navy-900'
+                : 'text-slate-700 hover:text-navy-900 hover:bg-slate-200/70'
             }`}
           >
-            <LinkIcon className="h-3.5 w-3.5 stroke-[2]" />
+            <LinkIcon className="w-4 h-4 stroke-[2.2]" />
             <span>URL / Link</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('qr')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer ${
+            className={`min-h-[44px] px-4 sm:px-5 py-2 rounded-xl text-sm font-black transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'qr'
-                ? 'bg-surface text-ink shadow-sm border border-borderline'
-                : 'text-ink-muted hover:text-ink'
+                ? 'bg-navy-900 text-white shadow-sm border border-navy-900'
+                : 'text-slate-700 hover:text-navy-900 hover:bg-slate-200/70'
             }`}
           >
-            <QrCode className="h-3.5 w-3.5 stroke-[2]" />
+            <QrCode className="w-4 h-4 stroke-[2.2]" />
             <span>QR Code</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('message')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer ${
+            className={`min-h-[44px] px-4 sm:px-5 py-2 rounded-xl text-sm font-black transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'message'
-                ? 'bg-surface text-ink shadow-sm border border-borderline'
-                : 'text-ink-muted hover:text-ink'
+                ? 'bg-navy-900 text-white shadow-sm border border-navy-900'
+                : 'text-slate-700 hover:text-navy-900 hover:bg-slate-200/70'
             }`}
           >
-            <MessageSquare className="h-3.5 w-3.5 stroke-[2]" />
+            <MessageSquare className="w-4 h-4 stroke-[2.2]" />
             <span>Suspicious Message</span>
           </button>
         </div>
 
         {/* Quick Test Presets */}
-        <div className="flex items-center gap-1.5 text-[11px] text-ink-muted flex-wrap">
-          <span className="text-ink-faint font-medium">Quick samples:</span>
+        <div className="flex items-center gap-1.5 flex-wrap text-xs">
+          <span className="text-slate-500 font-bold uppercase tracking-wider text-[11px] mr-1">
+            Presets:
+          </span>
           <button
             type="button"
             onClick={() => loadPreset('safe')}
-            className="px-2 py-0.5 rounded bg-canvas hover:bg-subtle border border-borderline text-ink hover:text-black transition-colors"
+            className="px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold transition-colors cursor-pointer"
           >
-            Safe link
+            Safe Link
           </button>
           <button
             type="button"
             onClick={() => loadPreset('redirect')}
-            className="px-2 py-0.5 rounded bg-canvas hover:bg-subtle border border-borderline text-ink hover:text-black transition-colors"
+            className="px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold transition-colors cursor-pointer"
           >
-            Redirect hops
+            Redirect Hops
           </button>
           <button
             type="button"
             onClick={() => loadPreset('qr-port')}
-            className="px-2 py-0.5 rounded bg-canvas hover:bg-subtle border border-borderline text-ink hover:text-black transition-colors font-mono"
+            className="px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold font-mono transition-colors cursor-pointer"
           >
-            QR with Port (:8443)
-          </button>
-          <button
-            type="button"
-            onClick={() => loadPreset('wifi')}
-            className="px-2 py-0.5 rounded bg-canvas hover:bg-subtle border border-borderline text-ink hover:text-black transition-colors"
-          >
-            Wi-Fi QR
+            Port :8443
           </button>
           <button
             type="button"
             onClick={() => loadPreset('message')}
-            className="px-2 py-0.5 rounded bg-canvas hover:bg-subtle border border-borderline text-ink hover:text-black transition-colors"
+            className="px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold transition-colors cursor-pointer"
           >
             Phishing + OTP
+          </button>
+          <button
+            type="button"
+            onClick={() => loadPreset('wifi')}
+            className="px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold transition-colors cursor-pointer"
+          >
+            Wi-Fi Config
           </button>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit}>
-        {/* Single Shared Input Area */}
-
+      <form onSubmit={handleSubmit} className="space-y-4">
         {/* 1. URL Mode */}
         {activeTab === 'url' && (
-          <div>
+          <div className="space-y-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">
+              Target Web Address or Shortened Link
+            </label>
             <div className="relative">
               <input
                 type="text"
                 value={urlInput}
                 onChange={(e) => setUrlInput(e.target.value)}
-                placeholder="https://example.com/login or paste any shortened link..."
-                className="w-full font-mono text-xs sm:text-sm px-4 py-3 rounded-lg border border-borderline bg-canvas/60 text-ink placeholder-ink-faint focus:outline-none focus:border-ink focus:bg-surface focus:ring-2 focus:ring-ink/5 transition-all shadow-inner"
+                placeholder="https://example.com/login or paste bit.ly, tinyurl, or suspicious link..."
+                className="w-full font-mono text-sm sm:text-base px-4 py-3.5 rounded-2xl border-2 border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-navy-900 focus:ring-0 shadow-inner transition-all"
               />
               {urlInput && (
                 <button
                   type="button"
                   onClick={() => setUrlInput('')}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-ink-muted hover:text-ink"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 hover:text-navy-900 cursor-pointer"
                 >
-                  Clear
+                  CLEAR
                 </button>
               )}
             </div>
-            <div className="flex items-center justify-between text-[11px] text-ink-muted mt-2">
-              <span>Resolves redirect chains &bull; Probes SSL &amp; non-standard ports</span>
-              <span className="text-ink-faint">SSRF &amp; DNS Rebinding Guard Active</span>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs text-slate-500 pt-1">
+              <span>Resolves full HTTP 301/302 redirect chains &bull; Probes SSL &amp; non-standard ports</span>
+              <span className="font-semibold text-emerald-700 inline-flex items-center gap-1">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                SSRF &amp; DNS Rebinding Guard Active
+              </span>
             </div>
           </div>
         )}
 
         {/* 2. QR Mode */}
         {activeTab === 'qr' && (
-          <div className="space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div className="flex items-center gap-1.5 flex-wrap">
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <button
                   type="button"
                   onClick={() => setQrMethod('upload')}
-                  className={`text-xs px-3 py-1 rounded-md font-semibold border transition-all cursor-pointer ${
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                     qrMethod === 'upload'
-                      ? 'bg-ink text-white border-ink shadow-2xs'
-                      : 'bg-surface text-ink-muted border-borderline hover:bg-canvas'
+                      ? 'bg-navy-900 text-white border-navy-900 shadow-sm'
+                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
                   }`}
                 >
                   Upload QR Image
@@ -199,10 +205,10 @@ export default function ScanSection({ onAnalyze, isLoading, scanningStep }) {
                 <button
                   type="button"
                   onClick={() => setQrMethod('camera')}
-                  className={`text-xs px-3 py-1 rounded-md font-semibold border transition-all cursor-pointer ${
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                     qrMethod === 'camera'
-                      ? 'bg-ink text-white border-ink shadow-2xs'
-                      : 'bg-surface text-ink-muted border-borderline hover:bg-canvas'
+                      ? 'bg-navy-900 text-white border-navy-900 shadow-sm'
+                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
                   }`}
                 >
                   Webcam Scanner
@@ -210,32 +216,18 @@ export default function ScanSection({ onAnalyze, isLoading, scanningStep }) {
                 <button
                   type="button"
                   onClick={() => setQrMethod('manual')}
-                  className={`text-xs px-3 py-1 rounded-md font-semibold border transition-all cursor-pointer ${
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                     qrMethod === 'manual'
-                      ? 'bg-ink text-white border-ink shadow-2xs'
-                      : 'bg-surface text-ink-muted border-borderline hover:bg-canvas'
+                      ? 'bg-navy-900 text-white border-navy-900 shadow-sm'
+                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
                   }`}
                 >
                   Paste / Manual Payload
                 </button>
               </div>
 
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => loadPreset('qr-port')}
-                  className="text-[11px] text-ink-muted hover:text-ink underline decoration-borderline cursor-pointer"
-                >
-                  Port 8443 sample
-                </button>
-                <span className="text-borderline">&bull;</span>
-                <button
-                  type="button"
-                  onClick={() => loadPreset('wifi')}
-                  className="text-[11px] text-ink-muted hover:text-ink underline decoration-borderline cursor-pointer"
-                >
-                  Wi-Fi sample
-                </button>
+              <div className="text-xs text-slate-500 font-semibold">
+                Decoded locally inside browser (Zero raw image upload)
               </div>
             </div>
 
@@ -246,19 +238,21 @@ export default function ScanSection({ onAnalyze, isLoading, scanningStep }) {
               <CameraScanner onDecoded={handleQrDecoded} />
             )}
 
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-xs text-ink font-semibold">QR Payload to Analyze:</span>
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  Decoded QR Payload:
+                </span>
                 {qrDecodedPayload && (
                   <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-risk-green-text bg-risk-green-bg px-2 py-0.5 rounded border border-risk-green-border">
-                      <CheckCircle2 className="h-3 w-3 stroke-[2.5]" />
-                      Payload ready
+                    <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 inline-flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3 stroke-[2.5]" />
+                      Payload Decoded
                     </span>
                     <button
                       type="button"
                       onClick={() => setQrDecodedPayload('')}
-                      className="text-[11px] text-ink-muted hover:text-ink underline"
+                      className="text-xs font-bold text-slate-400 hover:text-navy-900 underline cursor-pointer"
                     >
                       Clear
                     </button>
@@ -269,8 +263,8 @@ export default function ScanSection({ onAnalyze, isLoading, scanningStep }) {
                 type="text"
                 value={qrDecodedPayload}
                 onChange={(e) => setQrDecodedPayload(e.target.value)}
-                placeholder="QR payload populates automatically on scan/upload, or paste any QR URL/text directly..."
-                className="w-full font-mono text-xs px-3.5 py-2.5 rounded-lg border border-borderline bg-canvas/60 text-ink placeholder-ink-faint focus:outline-none focus:border-ink focus:bg-surface"
+                placeholder="QR payload populates automatically on upload/scan, or paste raw payload text directly..."
+                className="w-full font-mono text-sm px-4 py-3 rounded-2xl border-2 border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-navy-900 focus:ring-0 shadow-inner"
               />
             </div>
           </div>
@@ -278,31 +272,34 @@ export default function ScanSection({ onAnalyze, isLoading, scanningStep }) {
 
         {/* 3. Message Mode */}
         {activeTab === 'message' && (
-          <div>
+          <div className="space-y-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">
+              Suspicious Message Text (SMS, Email, WhatsApp Scam, OTP Prompt)
+            </label>
             <textarea
-              rows={3}
+              rows={4}
               value={messageInput}
               onChange={(e) => setMessageInput(e.target.value)}
-              placeholder="Paste email text, SMS delivery alert, WhatsApp scam message, or OTP prompt here..."
-              className="w-full text-xs sm:text-sm px-4 py-3 rounded-lg border border-borderline bg-canvas/60 text-ink placeholder-ink-faint focus:outline-none focus:border-ink focus:bg-surface focus:ring-2 focus:ring-ink/5 transition-all resize-y shadow-inner"
+              placeholder="Paste suspicious text here (e.g. 'URGENT: Your account is blocked. Share code 491029 to verify at https://...')"
+              className="w-full text-sm sm:text-base p-4 rounded-2xl border-2 border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-navy-900 focus:ring-0 shadow-inner transition-all resize-y"
             />
-            <div className="flex items-center justify-between mt-2 text-[11px] text-ink-muted">
-              <span>Extracts all web links &bull; Scans for artificial urgency and impersonation</span>
-              <span className="inline-flex items-center gap-1 text-risk-green-text font-semibold bg-risk-green-bg px-2 py-0.5 rounded border border-risk-green-border">
-                <ShieldCheck className="h-3 w-3 stroke-[2.2]" />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs text-slate-500 pt-1">
+              <span>Scans for psychological pressure, fake KYC threats &amp; embedded phishing URLs</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 inline-flex items-center gap-1 self-start sm:self-auto">
+                <ShieldCheck className="w-3.5 h-3.5 stroke-[2.2]" />
                 Zero-Leak OTP Masking Active
               </span>
             </div>
           </div>
         )}
 
-        {/* Bottom Bar: Multi-stage status + High-contrast Analyze Button */}
-        <div className="mt-4 pt-3.5 border-t border-borderline flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <div className="text-xs text-ink-muted">
+        {/* Bottom Action Row */}
+        <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="text-xs text-slate-600 font-medium">
             {isLoading ? (
-              <span className="flex items-center gap-2 text-ink font-semibold">
-                <Loader2 className="h-3.5 w-3.5 animate-spin text-ink" />
-                {scanningStep || 'Inspecting destination...'}
+              <span className="flex items-center gap-2 text-navy-900 font-bold">
+                <Loader2 className="w-4 h-4 animate-spin text-navy-900" />
+                {scanningStep || 'Inspecting destination and security vectors...'}
               </span>
             ) : (
               <span>Zero client execution &bull; SSRF protected &bull; Deterministic engine</span>
@@ -312,26 +309,26 @@ export default function ScanSection({ onAnalyze, isLoading, scanningStep }) {
           <button
             type="submit"
             disabled={!isFormValid() || isLoading}
-            className={`w-full sm:w-auto inline-flex items-center justify-center px-6 py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all shadow-sm ${
+            className={`min-h-[50px] w-full sm:w-auto px-8 py-3 rounded-xl text-base font-black transition-all shadow-sm flex items-center justify-center gap-2.5 ${
               isFormValid() && !isLoading
-                ? 'bg-ink text-white hover:bg-black active:scale-[0.99] cursor-pointer'
-                : 'bg-canvas text-ink-faint border border-borderline cursor-not-allowed'
+                ? 'bg-navy-900 hover:bg-navy-800 text-white cursor-pointer active:scale-[0.99]'
+                : 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
             }`}
           >
             {isLoading ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                <span>Running Scan...</span>
+                <Loader2 className="w-5 h-5 animate-spin mr-1" />
+                <span>Scanning Destination...</span>
               </>
             ) : (
               <>
-                <span>Analyze Destination</span>
-                <ArrowRight className="h-4 w-4 ml-2 stroke-[2.2]" />
+                <span>Analyze Security Risks</span>
+                <ArrowRight className="w-5 h-5 stroke-[2.2]" />
               </>
             )}
           </button>
         </div>
       </form>
-    </div>
+    </section>
   );
 }

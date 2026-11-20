@@ -7,34 +7,36 @@ export default function AIExplanation({ aiExplanation }) {
   const { aiLayerAvailable, explanation } = aiExplanation;
 
   return (
-    <div className="bg-surface border border-borderline rounded-xl p-4 sm:p-5 shadow-sm ring-1 ring-black/[0.02]">
-      <div className="flex items-center justify-between pb-3 mb-3 border-b border-borderline">
-        <h3 className="text-xs font-bold text-ink uppercase tracking-wider flex items-center gap-1.5">
+    <div className="bg-white/95 border-2 border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+        <h3 className="text-sm font-black text-navy-950 uppercase tracking-wider flex items-center gap-2">
           {aiLayerAvailable ? (
-            <Sparkles className="h-3.5 w-3.5 text-risk-green-text" />
+            <Sparkles className="w-4 h-4 text-emerald-600 stroke-[2.2]" />
           ) : (
-            <Cpu className="h-3.5 w-3.5 text-ink-muted" />
+            <Cpu className="w-4 h-4 text-slate-500 stroke-[2.2]" />
           )}
           <span>Security Analysis Summary</span>
         </h3>
-        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-canvas border border-borderline text-ink-muted">
+        <span className="text-xs font-mono font-bold text-navy-900 bg-navy-50 border border-navy-200 px-3 py-1 rounded-full">
           {aiLayerAvailable ? 'Gemini AI Verified' : 'Deterministic Synthesis'}
         </span>
       </div>
 
-      <div className="text-xs text-ink-muted leading-relaxed space-y-2">
+      {/* Body */}
+      <div className="text-sm sm:text-base text-slate-700 font-medium leading-relaxed space-y-2.5">
         {explanation ? (
-          explanation.split('\n\n').slice(0, 2).map((para, i) => (
-            <p key={i} className="text-ink font-normal leading-relaxed">
+          explanation.split('\n\n').slice(0, 3).map((para, i) => (
+            <p key={i} className="text-slate-800 leading-relaxed">
               {para}
             </p>
           ))
         ) : (
-          <p className="italic text-ink-faint">No summary generated.</p>
+          <p className="italic text-slate-400">No explanation generated.</p>
         )}
       </div>
 
-      <div className="mt-3 pt-2.5 border-t border-borderline/60 text-[10px] text-ink-faint">
+      <div className="pt-3 border-t border-slate-100 text-[11px] font-mono text-slate-400">
         Synthesized strictly from deterministic destination inspection without automated score adjustments.
       </div>
     </div>

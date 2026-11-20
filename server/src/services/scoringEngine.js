@@ -126,7 +126,7 @@ export function calculateSafetyScore({
   }
 
   // 3. Port Check
-  const finalPortInfo = redirectResult.finalPortInfo;
+  const finalPortInfo = redirectResult.finalPortInfo || { isStandard: true, effectivePort: 443, explanation: 'Standard Web Port (443)' };
   if (!finalPortInfo?.isStandard) {
     score -= 15;
     suspiciousFindings.push({

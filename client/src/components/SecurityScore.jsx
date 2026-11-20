@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShieldCheck, AlertTriangle, AlertOctagon, HelpCircle, ShieldAlert } from 'lucide-react';
 
-export default function SecurityScore({ safetyScore }) {
+export default function SecurityScore({ safetyScore, size = 220 }) {
   if (!safetyScore) return null;
 
   const {
@@ -13,116 +13,156 @@ export default function SecurityScore({ safetyScore }) {
     summaryReason,
   } = safetyScore;
 
-  // Exact color definitions per Design System
-  let ringColor = '#3F7A5C'; // Green
-  let badgeClass = 'text-risk-green-text bg-risk-green-bg border-risk-green-border';
+  const numericScore = typeof score === 'number' ? Math.max(0, Math.min(100, Math.round(score))) : 0;
+  const [animatedScore, setAnimatedScore] = useState(0);
+
+  useEffect(() => {
+    if (isUnableToVerify) {
+      setAnimatedScore(0);
+      return;
+    }
+    const timer = requestAnimationFrame(() => {
+      setAnimatedScore(numericScore);
+    });
+    return () => cancelAnimationFrame(timer);
+  }, [numericScore, isUnableToVerify]);
+
+  // Styling tokens matching reference website (niat-hackthon.vercel.app gauge)
+  let strokeColor = '#16A34A'; // emerald-600
+  let innerBg = '#F0FDF4';    // emerald-50
+  let statusText = 'LOW OBSERVED RISK';
+  let badgeColor = 'text-emerald-700 border-emerald-200 bg-emerald-50';
   let Icon = ShieldCheck;
 
   if (isUnableToVerify || band === 'Unable to Verify') {
-    ringColor = '#9A988F';
-    badgeClass = 'text-ink-muted bg-canvas border-borderline';
+    strokeColor = '#64748B';
+    innerBg = '#F8FAFC';
+    statusText = 'UNABLE TO VERIFY';
+    badgeColor = 'text-slate-600 border-slate-200 bg-slate-100';
     Icon = HelpCircle;
   } else if (bandColor === 'yellow' || band === 'Caution') {
-    ringColor = '#B4863C';
-    badgeClass = 'text-risk-amber-text bg-risk-amber-bg border-risk-amber-border';
+    strokeColor = '#D97706';
+    innerBg = '#FFFBEB';
+    statusText = 'CAUTION';
+    badgeColor = 'text-amber-800 border-amber-300 bg-amber-50';
     Icon = AlertTriangle;
   } else if (bandColor === 'orange' || band === 'High Risk') {
-    ringColor = '#B4863C';
-    badgeClass = 'text-risk-amber-text bg-risk-amber-bg border-risk-amber-border';
+    strokeColor = '#EA580C';
+    innerBg = '#FFF7ED';
+    statusText = 'HIGH RISK';
+    badgeColor = 'text-orange-800 border-orange-300 bg-orange-50';
     Icon = AlertTriangle;
   } else if (bandColor === 'red' || band === 'Critical Risk' || isThreatIntelMatch) {
-    ringColor = '#B23A3A';
-    badgeClass = 'text-risk-red-text bg-risk-red-bg border-risk-red-border';
+    strokeColor = '#DC2626';
+    innerBg = '#FEF2F2';
+    statusText = isThreatIntelMatch ? 'CONFIRMED THREAT' : 'CRITICAL RISK';
+    badgeColor = 'text-red-700 border-red-300 bg-red-50';
     Icon = isThreatIntelMatch ? ShieldAlert : AlertOctagon;
   }
 
-  // Calculate SVG gauge stroke with large radius
-  const numericScore = typeof score === 'number' ? score : 0;
-  const radius = 38;
+  // Exact math from reference gauge (useSpeech-DMecewva.js)
+  const strokeWidth = 16;
+  const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (numericScore / 100) * circumference;
+  const strokeDashoffset = isUnableToVerify
+    ? circumference
+    : circumference - (animatedScore / 100) * circumference;
 
   return (
-    <div className="bg-surface border border-borderline rounded-xl p-5 shadow-sm ring-1 ring-black/[0.02]">
-      <div className="flex items-center justify-between pb-3 mb-4 border-b border-borderline">
-        <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted flex items-center gap-1.5">
-          <Icon className="h-3.5 w-3.5 stroke-[2]" />
+    <div className="bg-white/95 border-2 border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col items-center justify-center text-center">
+      {/* Top Header Badge */}
+      <div className="w-full flex items-center justify-between pb-4 mb-4 border-b border-slate-200">
+        <span className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+          <Icon className="w-4 h-4 stroke-[2.2]" />
           <span>Security Assessment</span>
         </span>
-        <span className="text-[10px] font-mono text-ink-faint">
-          Deterministic Rules Engine
+        <span className="text-xs font-mono font-semibold text-slate-500 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full">
+          Deterministic Engine
         </span>
       </div>
 
-      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
-        {/* Large Circular SVG Ring Gauge (0-100) */}
-        <div className="relative w-24 h-24 shrink-0 flex items-center justify-center">
-          <svg className="w-24 h-24 -rotate-90 block" viewBox="0 0 96 96">
+      {/* 220px Circular Gauge matching reference site */}
+      <div className="flex flex-col items-center justify-center p-2 sm:p-4 my-2">
+        <div
+          className="relative flex items-center justify-center rounded-full p-2 transition-colors duration-500 shadow-inner"
+          style={{ width: size, height: size, backgroundColor: innerBg }}
+          role="progressbar"
+          aria-valuenow={isUnableToVerify ? 0 : numericScore}
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-label={`Safety score: ${isUnableToVerify ? 'Unavailable' : numericScore} out of 100, status ${statusText}`}
+        >
+          <svg
+            width={size}
+            height={size}
+            className="transform -rotate-90 origin-center"
+          >
+            {/* Background track */}
             <circle
-              cx="48"
-              cy="48"
+              cx={size / 2}
+              cy={size / 2}
               r={radius}
-              stroke="#E4E2DB"
-              strokeWidth="6"
+              stroke="#E2E8F0"
+              strokeWidth={strokeWidth}
               fill="none"
             />
+            {/* Progress track */}
             {!isUnableToVerify && (
               <circle
-                cx="48"
-                cy="48"
+                cx={size / 2}
+                cy={size / 2}
                 r={radius}
-                stroke={ringColor}
-                strokeWidth="6"
+                stroke={strokeColor}
+                strokeWidth={strokeWidth}
                 strokeDasharray={circumference}
                 strokeDashoffset={strokeDashoffset}
                 strokeLinecap="round"
                 fill="none"
-                className="transition-all duration-700 ease-out"
+                style={{
+                  transition: 'stroke-dashoffset 900ms cubic-bezier(0.22, 1, 0.36, 1), stroke 400ms ease-out',
+                }}
               />
             )}
           </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center select-none pointer-events-none">
-            <span className="font-mono text-3xl font-extrabold text-ink leading-none">
-              {isUnableToVerify ? '—' : score}
+
+          {/* Centered Score & Unit Typography */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+            <span className="text-xs uppercase font-extrabold tracking-widest text-slate-500 mb-0.5">
+              Safety Score
             </span>
-            {!isUnableToVerify && (
-              <span className="font-mono text-[10px] font-semibold text-ink-muted mt-0.5 leading-none">
-                / 100
-              </span>
-            )}
+            <div className="text-5xl font-black text-navy-950 tracking-tight leading-none tabular-nums flex items-baseline justify-center">
+              <span>{isUnableToVerify ? '—' : animatedScore}</span>
+              {!isUnableToVerify && (
+                <span className="text-2xl text-slate-400 font-bold ml-0.5">/100</span>
+              )}
+            </div>
+
+            {/* Verdict Badge pill inside/under the score */}
+            <span
+              className={`mt-2.5 text-xs sm:text-sm font-black px-3.5 py-1 rounded-full uppercase tracking-wider ${badgeColor} bg-white shadow-sm border verdict-pop`}
+            >
+              {band || statusText}
+            </span>
           </div>
         </div>
+      </div>
 
-        {/* Score Details: Risk classification + Summary */}
-        <div className="flex-1 min-w-0 text-center sm:text-left">
-          <div className="flex items-center justify-center sm:justify-start gap-2 mb-2 flex-wrap">
-            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold border ${badgeClass}`}>
-              <span className="h-2 w-2 rounded-full bg-current"></span>
-              {band}
-            </span>
-            {isThreatIntelMatch && (
-              <span className="text-[10px] font-bold text-risk-red-text bg-risk-red-bg border border-risk-red-border px-2 py-0.5 rounded-md">
-                Confirmed Threat Intel Match
-              </span>
-            )}
-          </div>
-
-          <p className="text-xs text-ink-muted leading-relaxed mb-3">
-            {summaryReason}
-          </p>
-
-          {/* Mini 4-band visual bar with label */}
-          <div className="flex items-center gap-1.5 w-full max-w-xs mx-auto sm:mx-0">
-            <div className={`h-1.5 flex-1 rounded-full ${numericScore < 20 && !isUnableToVerify ? 'bg-risk-red-text' : 'bg-borderline'}`} title="Critical Risk (0-19)" />
-            <div className={`h-1.5 flex-1 rounded-full ${numericScore >= 20 && numericScore < 50 && !isUnableToVerify ? 'bg-risk-amber-text' : 'bg-borderline'}`} title="High Risk (20-49)" />
-            <div className={`h-1.5 flex-1 rounded-full ${numericScore >= 50 && numericScore < 80 && !isUnableToVerify ? 'bg-[#C9941D]' : 'bg-borderline'}`} title="Caution (50-79)" />
-            <div className={`h-1.5 flex-1 rounded-full ${numericScore >= 80 && !isUnableToVerify ? 'bg-risk-green-text' : 'bg-borderline'}`} title="Low Risk (80-100)" />
-          </div>
-
-          <div className="text-[10px] text-ink-faint mt-1.5 font-mono">
-            Scale: 0 (Critical Risk) to 100 (Low Observed Risk)
-          </div>
+      {/* Confirmed Threat Match Warning */}
+      {isThreatIntelMatch && (
+        <div className="mt-2 text-xs font-bold uppercase tracking-wider text-red-700 bg-red-50 border-2 border-red-300 px-3.5 py-1 rounded-full inline-flex items-center gap-1.5 shadow-sm">
+          <AlertOctagon className="w-3.5 h-3.5" />
+          <span>Confirmed Threat Intelligence Match (Google Safe Browsing)</span>
         </div>
+      )}
+
+      {/* Summary reason */}
+      <p className="mt-4 text-sm text-slate-700 font-medium leading-relaxed max-w-md">
+        {summaryReason}
+      </p>
+
+      {/* Scale guide caption */}
+      <div className="mt-3 pt-3 border-t border-slate-100 w-full max-w-xs text-[11px] font-mono text-slate-400">
+        Scale: 0 (Critical Threat) &rarr; 100 (Low Observed Risk)
       </div>
     </div>
   );
